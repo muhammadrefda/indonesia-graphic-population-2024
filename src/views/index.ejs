@@ -4,9 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 5px solid #007bff;
+        }
+    </style>
 </head>
 <body>
 <h1><%= title %></h1>
-<p>Data populasi akan ditampilkan di sini.</p>
+<canvas id="populationChart" width="400" height="200"></canvas>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async function () {
+        const ctx = document.getElementById("populationChart").getContext("2d");
+
+        try {
+            const populationData = <%- JSON.stringify(populationData) %>;
+
+            const labels = populationData.map(item => item.province);
+            const dataValues = populationData.map(item => item.population);
+
+            const colors = labels.map((_, i) => `hsl(${(i * 30) % 360}, 70%, 50%)`);
+
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: "Populasi per Provinsi (2024)",
+                    data: dataValues,
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color.replace('50%', '30%')),
+                    borderWidth: 1
+                }]
+            };
+
+            new Chart(ctx, {
+                type: "bar",
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error("❌ Gagal memuat data populasi:", error);
+        }
+    });
+</script>
+
+<!-- Kesimpulan -->
+<div id="summary">
+    <h2>Kesimpulan</h2>
+    <p><strong>Total Populasi:</strong> <%= summary.total %> jiwa</p>
+    <p><strong>Provinsi dengan Populasi Tertinggi:</strong> <%= summary.highest %></p>
+    <p><strong>Provinsi dengan Populasi Terendah:</strong> <%= summary.lowest %></p>
+    <p><strong>Analisis:</strong> <%= summary.mainPoint %></p>
+</div>
+
 </body>
 </html>
